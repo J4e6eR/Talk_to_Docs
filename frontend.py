@@ -30,7 +30,7 @@ def main():
     
     # Initializing the LLM model
     config={
-  "access_token": f"{tokens.load_tokens('GPT_ACCESS_TOKEN')}",
+  "access_token": f"{tokens.load_verified_token('GPT_ACCESS_TOKEN')}",
   "conversation_id": '34e32a56-66f7-4955-bd40-526f78937ee8',
 }
     llm = app.model_init(config)
