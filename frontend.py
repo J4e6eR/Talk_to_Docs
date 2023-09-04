@@ -39,9 +39,10 @@ def main():
     docs = app.docsReader_PDF(file_path)
     print("The docs successfully splitted into chunks ")
     # INitializing the embedding function
-    embedding_function = app.embedding_model_init(model_name = "BAAI/bge-large-en",
+        embedding_function = app.embedding_model_init(model_name = "BAAI/bge-large-en",
                                                     model_kwargs = {'device': 'cpu'},
-                                                    encode_kwargs = {'normalize_embeddings': True})
+                                                    encode_kwargs = {'normalize_embeddings': True,},
+                                                    cache_folder='.\\hugging_face_model\\')
     
     print("Embedding function initialized", embedding_function)
 

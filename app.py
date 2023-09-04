@@ -44,11 +44,13 @@ def docsReader_PDF(file_location_url:str):
 def embedding_model_init(model_name:str,
                          model_kwargs:dict,
                          encode_kwargs:dict,
+                         cache_folder:str
                          ):
     embedding_func = HuggingFaceBgeEmbeddings(
     model_name=model_name,
     model_kwargs=model_kwargs,
-    encode_kwargs=encode_kwargs
+    encode_kwargs=encode_kwargs,
+    cache_folder= cache_folder
 )
     return embedding_func
 
