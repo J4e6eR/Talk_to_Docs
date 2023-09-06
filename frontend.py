@@ -7,12 +7,14 @@ import streamlit as st
 import os
 import app
 import tokens
+from ngrok_ import async_tasks
 
 file_path = None
 uploaded_file = None
 file = os.getcwd()
 
 def main():
+    async_tasks()
     global file_path
     global uploaded_file
 
@@ -41,7 +43,7 @@ def main():
     docs = app.docsReader_PDF(file_path)
     print("The docs successfully splitted into chunks ")
     # INitializing the embedding function
-        embedding_function = app.embedding_model_init(model_name = "BAAI/bge-large-en",
+    embedding_function = app.embedding_model_init(model_name = "BAAI/bge-large-en",
                                                     model_kwargs = {'device': 'cpu'},
                                                     encode_kwargs = {'normalize_embeddings': True,},
                                                     cache_folder='.\\hugging_face_model\\')

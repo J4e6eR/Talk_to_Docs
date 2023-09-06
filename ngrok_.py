@@ -2,8 +2,11 @@
 # The original plan is to run the script in otgher colab to see if tey work interchangably. If not then we will have to add async functionality on our original application
 
 from pyngrok import ngrok, conf
+# import threading
+import multiprocessing
 import re 
 import time
+import asyncio
 
 import ssl
 
@@ -11,19 +14,47 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 
 # Helps to chnage the location to desired location
-region_name = input("Enter the region: ")
-conf.get_default().region = region_name
-print("Default region = ",conf.get_default().region)
+# region_name = input("Enter the region: ")
+# conf.get_default().region = region_name
+# print("Default region = ",conf.get_default().region)
+
+# # default port address for streamlit app is 8501
+# # <NgrokTunnel: "tcp://0.tcp.ngrok.io:12345" -> "localhost:22">
+# ssh_tunnel = ngrok.connect(8501, "tcp")
+# print(type(str(ssh_tunnel)))
+# print (ssh_tunnel)
+# print (ssh_tunnel.public_url)
+# reduced_string = re.sub(r'.', '',ssh_tunnel.public_url , count = 6)
+# print(reduced_string)
+
+PORT_NUMBER = 8051
 
 
-# <NgrokTunnel: "tcp://0.tcp.ngrok.io:12345" -> "localhost:22">
-ssh_tunnel = ngrok.connect(25565, "tcp")
-print(type(str(ssh_tunnel)))
-print (ssh_tunnel)
-print (ssh_tunnel.public_url)
-reduced_string = re.sub(r'.', '',ssh_tunnel.public_url , count = 6)
-print(reduced_string)
+def sleep():
+    time.sleep(18000)
+    print("After sleep")
+
+# For Streamlit application
+def main_init(region_name:str = 'in', port_number: int = 8051):
+    conf.get_default().region = region_name
+    print("Default region = ",conf.get_default().region)
+
+    ssh_tunnel = ngrok.connect(8501, "tcp")
+    print (ssh_tunnel)
+    reduced_string = re.sub(r'.', '',ssh_tunnel.public_url , count = 6)
+    print("Copy and paste this URL in your browser: ",reduced_string)
+
+def async_tasks():
+    region_name = input("Enter the region: ")
+    main_init(region_name=region_name, port_number=PORT_NUMBER)
+    print("Before Sleep")
+    process_thread = multiprocessing.Process(target=sleep)
+    process_thread.start()
+    # The script runs for atleast 12 hours
+    
 
 
-# The script runs for atleast 12 hours
-time.sleep(18000)
+if __name__ == '__main__':
+    # process_thread.start()
+    async_tasks()
+    print("The async is working perfectly fine")
