@@ -1,5 +1,7 @@
 # The frontend of the application written in streamlit
 # import streamlit as st
+# TODO: TO include the platform dependent implementation of ngrok and add asynchronous support for tunneling so we can handle streamlit responses  
+
 
 import streamlit as st
 import os
