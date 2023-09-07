@@ -38,10 +38,11 @@ def sleep():
 
 # For Streamlit application
 def main_init(region_name:str = 'in', port_number: int = 8051):
+    print("Port number =", port_number)
     conf.get_default().region = region_name
     print("Default region = ",conf.get_default().region)
 
-    ssh_tunnel = ngrok.connect(8501, "tcp")
+    ssh_tunnel = ngrok.connect(port_number, "tcp")
     print (ssh_tunnel)
     reduced_string = re.sub(r'.', '',ssh_tunnel.public_url , count = 6)
     print("Copy and paste this URL in your browser: ",reduced_string)
@@ -51,14 +52,12 @@ def async_tasks():
     # Getting the information of which file the function was called form
     calling_file = inspect.currentframe().f_back.f_code.co_filename
     
-    # Used to trim so that we can get actual file name
-    length = len(str(os.getcwd())) + 1
-    if calling_file[length:] == 'ngrok_.py' or 'frontend.py':
+    if calling_file.endswith('ngrok_.py') or calling_file.endswith('frontend.py'):
         PORT_NUMBER = 8051
     else:
         PORT_NUMBER = 10000
     
-    print("Calling function name =", calling_file[length:], 'port number =', PORT_NUMBER)
+    print("Calling function name =", calling_file, 'port number =', PORT_NUMBER)
     region_name = input("Enter the region: ")
     main_init(region_name=region_name, port_number=PORT_NUMBER)
     print("Before Sleep")
