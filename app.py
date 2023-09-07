@@ -63,6 +63,7 @@ def vector_store(docs,
     
     db = Chroma.from_documents(docs, embedding=embedding_function, persist_directory='.\chromadb')
     if save_locally:
+        print("TO BE SAVED LOCALLY")
         db.persist()
     print("Vector embeddings =", db)
     return db
@@ -83,7 +84,7 @@ def model_init(config:dict):
 
 # Generates the very output but in unformatted manner.
 def generate_output(query:str, database, llm):
-    prompt = Chroma.similarity_search(query=query)
+    prompt = database.similarity_search(query=query)
     question ="'temperature 0.01' " + prompt[0].page_content + ' Give me a summary in context to the question and print only the summary' + query #We wil have to think of a better option to pick out relevant documents instead of the very first one
     # llm = model_init(config)
     llm._call(prompt)

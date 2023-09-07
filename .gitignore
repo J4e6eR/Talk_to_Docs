@@ -46,6 +46,7 @@ json_files/
 .wwebjs_cache/
 docs/
 chromadb/
+hugging_face_model/
 
 
 # TypeScript v1 declaration files
