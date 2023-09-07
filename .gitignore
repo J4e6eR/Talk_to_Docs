@@ -47,6 +47,7 @@ json_files/
 docs/
 chromadb/
 hugging_face_model/
+__pycache__/
 
 
 # TypeScript v1 declaration files
