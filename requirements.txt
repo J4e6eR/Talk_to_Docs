@@ -1,4 +1,0 @@
-streamlit
-colab-xterm
-pyngrok
-langchain
