@@ -37,15 +37,28 @@ def sleep():
     print("After sleep")
 
 # For Streamlit application
-def main_init(region_name:str = 'in', port_number: int = 8051):
+def main_init(region_name:str = 'in', port_number: int = 8051, decider:int = 1):
     print("Port number =", port_number)
     conf.get_default().region = region_name
     print("Default region = ",conf.get_default().region)
+    
+    # Determines the usage of terminal as it is hosted on localhost
+    if decider == 1:
+        ssh_tunnel = ngrok.connect(port_number, "tcp")
+        print (ssh_tunnel)
+        reduced_string = re.sub(r'.', '',ssh_tunnel.public_url , count = 6)
+        print("Copy and paste this URL in your browser: ",reduced_string)
 
-    ssh_tunnel = ngrok.connect(port_number, "tcp")
-    print (ssh_tunnel)
-    reduced_string = re.sub(r'.', '',ssh_tunnel.public_url , count = 6)
-    print("Copy and paste this URL in your browser: ",reduced_string)
+    # Determines the usage of streamlmit as it is seen to be hosted on a network url other than the localhost
+    elif decider == 2:
+        # Address of the tunnel
+        target_addr = input("Enter the target address: ")
+
+        # Create a Ngrok tunnel to the target address
+        public_url = ngrok.connect(addr = target_addr)
+
+        # Print the public URL of the tunnel
+        print("Copy and paste this tunnel URL in your browser :", public_url)
 
 def async_tasks():
     
@@ -59,7 +72,8 @@ def async_tasks():
     
     print("Calling function name =", calling_file, 'port number =', PORT_NUMBER)
     region_name = input("Enter the region: ")
-    main_init(region_name=region_name, port_number=PORT_NUMBER)
+    local_network_decider = int(input("Enter 1 for accessiong terminal and 2 for accessing streamit : "))
+    main_init(region_name=region_name, port_number=PORT_NUMBER, decider = local_network_decider)
     print("Before Sleep")
     process_thread = multiprocessing.Process(target=sleep)
     process_thread.start()
