@@ -4,15 +4,15 @@
 # The filepath at 46 line is creating problem, will have to solve it.
 
 import streamlit as st
-import os
 import app
 import tokens
 from ngrok_ import async_tasks
-import threading
+from pathlib import Path
+
 
 file_path = None
 uploaded_file = None
-file = os.getcwd()
+file = Path.cwd()
 
 def main():
     print('Entered the main function')
@@ -31,7 +31,10 @@ def main():
     
     if uploaded_file is not None:
         st.write("You uploaded:", uploaded_file.name)
-        file_path = file +'\\docs\\' + str(uploaded_file.name)  
+        file_path = file / 'docs' / str(uploaded_file.name) 
+
+        print("File path = ", file_path)
+
         with open(file_path, "wb") as temp_file:
             temp_file.write(uploaded_file.read())
         print("You uploaded the file", uploaded_file, 'file path = ', file_path)

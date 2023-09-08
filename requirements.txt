@@ -1,0 +1,5 @@
+streamlit
+colab-xterm
+pyngrok
+langchain
+revChatGPT

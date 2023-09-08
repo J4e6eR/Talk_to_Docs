@@ -1,5 +1,7 @@
 import pickle
 import os
+from pathlib import Path
+
 
 global token 
 token = dict()
@@ -31,11 +33,12 @@ def dump_tokens(key:str,token_to_add:str):
     pickle.dump(token, outfile)
     outfile.close()
 
-curr_dir = os.getcwd()
-token_path = curr_dir + '\\tokenList.pkl' 
+curr_dir = Path.cwd()
+token_path = curr_dir / "tokenList.pkl" 
 
 # We should call this method which takes care of the access tokens
-def load_verified_token(access_key:str ):    
+def load_verified_token(access_key:str ):  
+    print("Token path =", token_path)  
     if os.path.exists(token_path) and load_tokens(access_key) != None:
         return load_tokens(access_key)
     else:
@@ -47,9 +50,8 @@ if __name__ == "__main__":
     # dump_tokens("HUGGING_FACE_testing_prompt_engineering","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")
     # print(type(load_tokens("HUGGING_FACE_testing_prompt_engineering")))
     # print(load_tokens())
-    if(load_tokens("GPT_ACCESS_TOKE") == None):
-        print("Entered ")
-    
+    # if(load_tokens("GPT_ACCESS_TOKE") == None):
+    #     print("Entered ")
 
-
+    load_verified_token('GPT_ACCESS_TOKEN')
     

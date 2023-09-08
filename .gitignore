@@ -115,5 +115,5 @@ dist
 .tern-port
 
 
-*.txt
+# *.txt
 .png
