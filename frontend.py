@@ -8,6 +8,7 @@ import app
 import tokens
 from ngrok_ import async_tasks
 from pathlib import Path
+import os
 
 
 file_path = None
@@ -31,7 +32,14 @@ def main():
     
     if uploaded_file is not None:
         st.write("You uploaded:", uploaded_file.name)
-        file_path = file / 'docs' / str(uploaded_file.name) 
+        folder_path = file / 'docs' 
+        file_path =  folder_path / str(uploaded_file.name) 
+
+        if os.path.exists(folder_path):
+            print("The file path already exists")
+        else:
+            print('The file path does not exist and will be created using os.makedirs()')
+            os.makedirs(folder_path)
 
         print("File path = ", file_path)
 
@@ -41,7 +49,7 @@ def main():
                 # Initializing the LLM model
     
         # Passing the doc to slit it into chunks 
-        docs = app.docsReader_PDF(file_path)
+        docs = app.docsReader_PDF(str(file_path))
         print("The docs successfully splitted into chunks ")
         # INitializing the embedding function
         embedding_function = app.embedding_model_init(model_name = "BAAI/bge-large-en",

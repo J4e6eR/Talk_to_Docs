@@ -3,3 +3,6 @@ colab-xterm
 pyngrok
 langchain
 revChatGPT
+pypdf
+sentence_transformers
+chromadb
