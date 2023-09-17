@@ -26,7 +26,7 @@ def main():
     # file_path = file + '\\docs\\' + 'dummyfile.pdf'
     config={
             "access_token": f"{tokens.load_verified_token('GPT_ACCESS_TOKEN')}",
-            "conversation_id": '34e32a56-66f7-4955-bd40-526f78937ee8',
+            "conversation_id": 'c6f6fb09-6981-48c9-b4a8-2c77822fc691',
     }
     llm = app.model_init(config)
     
@@ -35,7 +35,7 @@ def main():
         folder_path = file / 'docs' 
         file_path =  folder_path / str(uploaded_file.name) 
 
-        if os.path.exists(folder_path):
+        if os.path.exists(folder_path) or os.path.exists(file_path):
             print("The file path already exists")
         else:
             print('The file path does not exist and will be created using os.makedirs()')
