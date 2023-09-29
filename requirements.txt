@@ -6,3 +6,5 @@ revChatGPT
 pypdf
 sentence_transformers
 chromadb
+curl_cffi
+browser_cookie3
