@@ -45,10 +45,14 @@ def main():
                                                   encode_kwargs = {'normalize_embeddings': True,},
                                                   cache_folder='.\\hugging_face_model\\')
             
+    
     print("Embedding function initialized", embedding_function)
     doc_folder = file / 'docs'
-    st.write("List of all files: ", os.listdir(str(doc_folder)))
-    print("List of all files: ", type(os.listdir(str(doc_folder))))
+    if os.path.exists(doc_folder):
+        st.write("List of all files: ", os.listdir(str(doc_folder)))
+        print("List of all files: ", type(os.listdir(str(doc_folder))))
+
+
     # Button to init processing
     if st.button("Process New File") and input_value is not None:
         if uploaded_file is not None:
