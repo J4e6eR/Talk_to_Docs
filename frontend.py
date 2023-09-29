@@ -14,6 +14,7 @@ import os
 file_path = None
 uploaded_file = None
 file = Path.cwd()
+# async_tasks()
 
 def main():
     print('Entered the main function')
@@ -80,7 +81,6 @@ def main():
     input_value = st.text_input("Enter your query:", value="", key="text_input_field", help="Enter your input text here.")
         
     
-async_tasks()
 
 if __name__ == "__main__":
     # Create a thread to run the Streamlit app
@@ -88,4 +88,5 @@ if __name__ == "__main__":
     
     # Start the thread
     # thread.start()
+    # async_tasks()
     main()

@@ -10,7 +10,7 @@ import asyncio
 import inspect
 import ssl
 import os
-
+import subprocess
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -52,8 +52,8 @@ def main_init(region_name:str = 'in', port_number: int = 8051, decider:int = 1):
     # Determines the usage of streamlmit as it is seen to be hosted on a network url other than the localhost
     elif decider == 2:
         # Address of the tunnel
-        target_addr = input("Enter the target address: ")
-
+        # target_addr = input("Enter the target address: ")
+        target_addr = 'http://172.28.0.12:8501'
         # Create a Ngrok tunnel to the target address
         public_url = ngrok.connect(addr = target_addr)
 
@@ -83,5 +83,11 @@ def async_tasks():
 
 if __name__ == '__main__':
     # process_thread.start()
+    from pathlib import Path
+    app_script = Path.cwd() / 'frontend.py'
+
     async_tasks()
     print("The async is working perfectly fine")
+    
+    # Runs the streamlit app here itself
+    subprocess.run(["streamlit", "run", app_script])
