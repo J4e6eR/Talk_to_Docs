@@ -3,7 +3,8 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores  import Chroma
-from customLLM import CustomLLM, MyHandler
+# from customLLM import CustomLLM, MyHandler
+from customLLM import CustomLLM, Role_type
 from frontend import file_path, uploaded_file
 import tokens
 import app
@@ -76,18 +77,18 @@ def vector_load(persist_directory :str,
     return data_base
 
 # Initialises the model
-def model_init(config:dict):
+def model_init(access_token: str):
     # The model should be initialized at the start of the session
-    llm = CustomLLM(config = config)
+    llm = CustomLLM(access_token= access_token)
     return llm
 
 
 # Generates the very output but in unformatted manner.
-def generate_output(query:str, database, llm):
+def generate_output(query:str, database, llm, conversation_id: str = None):
     prompt = database.similarity_search(query=query)
     question ="'temperature 0.01' " + prompt[0].page_content + ' Give me a summary in context to the question and print only the summary' + query #We wil have to think of a better option to pick out relevant documents instead of the very first one
     # llm = model_init(config)
-    llm._call(prompt)
+    llm._call(prompt,role=Role_type.USER.value, conversation_id=conversation_id)
     
     # The output needs to be formatted as it would include a lot of information of no use to the User
     return llm.response['message'] 

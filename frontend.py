@@ -28,7 +28,7 @@ def main():
             "access_token": f"{tokens.load_verified_token('GPT_ACCESS_TOKEN')}",
             "conversation_id": 'c6f6fb09-6981-48c9-b4a8-2c77822fc691',
     }
-    llm = app.model_init(config)
+    llm = app.model_init(access_token=tokens.load_verified_token('GPT_ACCESS_TOKEN'))
     
     if uploaded_file is not None:
         st.write("You uploaded:", uploaded_file.name)
@@ -68,7 +68,8 @@ def main():
         #     "conversation_id": '34e32a56-66f7-4955-bd40-526f78937ee8',
         # }
         # llm = app.model_init(config)
-        summary = app.generate_output(input_value,db, llm)
+        # To add conversation ID of the account which will be used
+        summary = app.generate_output(input_value,db, llm, conversation_id='c6f6fb09-6981-48c9-b4a8-2c77822fc691')
         print("The summary generated", summary)
 
         # Display the input value
