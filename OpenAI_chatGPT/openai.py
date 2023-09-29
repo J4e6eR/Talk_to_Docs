@@ -59,7 +59,7 @@ class OpenaiChat(AsyncProvider):
     headers               = None
 
 
-    def __init__(self, access_token: str) -> None:
+    def __init__(self, access_token: str, conversation_id :str = None) -> None:
         # super().__init__()
         self._access_token = access_token
         self._access_token = access_token
@@ -72,6 +72,7 @@ class OpenaiChat(AsyncProvider):
         }
         self.cookies = None
         self.conversation_mapping = {}
+        self.conversation_id = conversation_id
 
     # @classmethod
     async def get_msg_history(self, convo_id: str, encoding: str | None = None) -> list:
@@ -84,6 +85,7 @@ class OpenaiChat(AsyncProvider):
         msg_url = f"{BASE_URL}/{convo_id}"
         async with AsyncSession(proxies=self.proxies, headers=self.headers, impersonate="chrome107") as session:
             response = await session.get(msg_url)
+            # print("response from get message history ", response.text)
             response.raise_for_status()
             return response.json()
 
@@ -91,6 +93,7 @@ class OpenaiChat(AsyncProvider):
     async def create_async(
         self,
         prompt: list[str],
+        # system_prompt: list[str] = None,
         model: Optional [str] = None,
         proxy: str = None,
         access_token: str = None,
@@ -100,7 +103,9 @@ class OpenaiChat(AsyncProvider):
         disable_history: bool = False,
         **kwargs: dict
     ) -> Formatted_Response:
-        
+        if conversation_id != None:
+            self.conversation_id = conversation_id
+
         self.prompt = prompt
         
         if proxy:
@@ -118,10 +123,10 @@ class OpenaiChat(AsyncProvider):
             self.prompt = [prompt]
 
         # Get the list of all messages in a current converation
-        history = await self.get_msg_history(conversation_id)
+        history = await self.get_msg_history(self.conversation_id)
 
         # The thing which is of concern here is that the currentnode of the previous conversation would be set as the parent node to get the message registered
-        self.conversation_mapping[conversation_id] = history["current_node"] 
+        self.conversation_mapping[self.conversation_id] = history["current_node"] 
 
         async with AsyncSession(proxies=self.proxies, headers=self.headers, cookies = self.cookies, impersonate="chrome107") as session:
             messages = [
@@ -135,14 +140,15 @@ class OpenaiChat(AsyncProvider):
             data = {
                 "action": "next",
                 "messages": messages,
-                "conversation_id": conversation_id or None,
-                "parent_message_id": self.conversation_mapping[conversation_id] or str(uuid.uuid4()),
+                "conversation_id": self.conversation_id or None,
+                "parent_message_id": self.conversation_mapping[self.conversation_id] or str(uuid.uuid4()),
                 "model": model or "text-davinci-002-render-sha",
                 "history_and_training_disabled": disable_history,
             }
 
             response = await session.post(BASE_URL, json=data)
             # print("Response =", response.text)
+            # print("Response type =", type(response.text))
             response.raise_for_status()
             last_message = None
             
@@ -150,10 +156,14 @@ class OpenaiChat(AsyncProvider):
                 if line.startswith("data: "):
                     line = line[6:]
                     if line != "[DONE]":
-                        line = json.loads(line)
-                        if "message" in line:
+                        try :
+                            msg = json.loads(line)
+                        except Exception as e:
+                            continue
+                        if "message" in msg:
                             # last_message = line["message"]["content"]["parts"][0]
-                            last_message = line
+                            last_message = msg
+            # print("The last message = ", last_message)
             return Formatted_Response(last_message)
 
     # @classmethod
