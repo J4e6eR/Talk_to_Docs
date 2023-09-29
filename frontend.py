@@ -80,7 +80,7 @@ def main():
     input_value = st.text_input("Enter your query:", value="", key="text_input_field", help="Enter your input text here.")
         
     
-    async_tasks()
+async_tasks()
 
 if __name__ == "__main__":
     # Create a thread to run the Streamlit app
