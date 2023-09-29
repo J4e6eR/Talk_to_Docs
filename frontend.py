@@ -1,7 +1,6 @@
 # The frontend of the application written in streamlit
 # import streamlit as st
-# TODO: TO include the platform dependent implementation of ngrok and add asynchronous support for tunneling so we can handle streamlit responses  
-# The filepath at 46 line is creating problem, will have to solve it.
+# TODO: To solve the problem related to persist directory and locally stoing hugging face model
 
 import streamlit as st
 import app
@@ -10,18 +9,20 @@ from ngrok_ import async_tasks
 from pathlib import Path
 import os
 
-# To determine the location more accurately
-HUGGING_FACE_MODEL = './hugging_face_model/'
-CHROMADB_DIRECTORY = './chroma_db/'
-import platform
-if platform.system() is not 'Windows':
-    HUGGING_FACE_MODEL = '.\\hugging_face_model\\'
-    CHROMADB_DIRECTORY = '.\\chroma_db\\'
+# # To determine the location more accurately
+# HUGGING_FACE_MODEL = './hugging_face_model/'
+# CHROMADB_DIRECTORY = './chroma_db/'
+# import platform
+# if platform.system() is not 'Windows':
+#     HUGGING_FACE_MODEL = '.\\hugging_face_model\\'
+#     CHROMADB_DIRECTORY = '.\\chroma_db\\'
 
 
 file_path = None
 uploaded_file = None
 file = Path.cwd()
+hugging_face_dir = file / 'hugging_face_models'
+chroma_db_dir = file / 'chroma_db_embed'
 # async_tasks()
 
 # This function shoudl be called for generating summary for teh given prompt
@@ -51,7 +52,7 @@ def main():
     embedding_function = app.embedding_model_init(model_name = "BAAI/bge-large-en",
                                                   model_kwargs = {'device': 'cpu'},
                                                   encode_kwargs = {'normalize_embeddings': True,},
-                                                  cache_folder='.\\hugging_face_model\\')
+                                                  cache_folder=str(hugging_face_dir))
             
     
     print("Embedding function initialized", embedding_function)
@@ -88,7 +89,7 @@ def main():
             
 
             # Converting the documents to vector store
-            db = app.vector_store(docs, embedding_function, save_locally=True, persist_directory='.\chromadb')
+            db = app.vector_store(docs, embedding_function, save_locally=True, persist_directory=str(chroma_db_dir))
             print("Convertomg the doc into vector store", db)
             gen_summary(input_value, db, llm, conversation_id='c6f6fb09-6981-48c9-b4a8-2c77822fc691')
 
@@ -101,7 +102,7 @@ def main():
             # To add conversation ID of the account which will be used
         
     elif st.button("Process already existing file") and input_value is not None:
-        db = app.vector_load(persist_directory='.\chromadb', embedding_function=embedding_function)
+        db = app.vector_load(persist_directory=str(chroma_db_dir), embedding_function=embedding_function)
         gen_summary(input_value, db, llm, conversation_id='c6f6fb09-6981-48c9-b4a8-2c77822fc691')
 
     else:

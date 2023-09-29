@@ -86,7 +86,7 @@ def model_init(access_token: str):
 # Generates the very output but in unformatted manner.
 def generate_output(query:str, database, llm, conversation_id: str = None):
     prompt = database.similarity_search(query=query)
-    question ="'temperature 0.01' " + prompt[0].page_content + ' Give me a summary in context to the question and print only the summary' + query #We wil have to think of a better option to pick out relevant documents instead of the very first one
+    question ="'temperature 0.01' \n" + prompt[0].page_content + '\n Give me a summary in context to the question and print only the summary\n' + query #We wil have to think of a better option to pick out relevant documents instead of the very first one
     # llm = model_init(config)
     llm._call(prompt,role=Role_type.USER.value, conversation_id=conversation_id)
     
