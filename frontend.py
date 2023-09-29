@@ -10,6 +10,14 @@ from ngrok_ import async_tasks
 from pathlib import Path
 import os
 
+# To determine the location more accurately
+HUGGING_FACE_MODEL = './hugging_face_model/'
+CHROMADB_DIRECTORY = './chroma_db/'
+import platform
+if platform.system() is not 'Windows':
+    HUGGING_FACE_MODEL = '.\\hugging_face_model\\'
+    CHROMADB_DIRECTORY = '.\\chroma_db\\'
+
 
 file_path = None
 uploaded_file = None
