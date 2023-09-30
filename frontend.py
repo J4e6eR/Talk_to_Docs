@@ -106,6 +106,10 @@ def main():
         db = app.vector_load(persist_directory=str(chroma_db_dir), embedding_function=embedding_function)
         gen_summary(input_value, db, llm, conversation_id='c6f6fb09-6981-48c9-b4a8-2c77822fc691')
 
+    elif input_value is not None:
+        llm._call(prompt=input_value, role='user', conversation_id='c6f6fb09-6981-48c9-b4a8-2c77822fc691', )
+        st.write("AI model:",llm.response.msg)
+        
     else:
         print("You might have not entered the query to search for. Please enter it and try again")
 
