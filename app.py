@@ -62,7 +62,7 @@ def vector_store(docs,
                  persist_directory :str = None,
                  ):
     
-    db = Chroma.from_documents(docs, embedding=embedding_function, persist_directory='.\chromadb')
+    db = Chroma.from_documents(docs, embedding=embedding_function, persist_directory=persist_directory)
     if save_locally:
         print("TO BE SAVED LOCALLY")
         db.persist()

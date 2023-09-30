@@ -1,6 +1,7 @@
 # The frontend of the application written in streamlit
 # import streamlit as st
 # TODO: To solve the problem related to persist directory and locally stoing hugging face model
+# TRY THE NEW IMPLEMENTATION IN COLAB TOMORROW
 
 import streamlit as st
 import app
