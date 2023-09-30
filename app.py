@@ -93,7 +93,7 @@ def generate_output(query:str, database, llm, conversation_id: str = None):
     llm._call(prompt=question,role=Role_type.USER.value, conversation_id=conversation_id)
     
     # The output needs to be formatted as it would include a lot of information of no use to the User
-    return llm.response['message'] 
+    return llm.response.msg 
 
 
 # if __name__ == '__main__' and uploaded_file:
