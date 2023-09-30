@@ -48,6 +48,8 @@ docs/
 chromadb/
 hugging_face_model/
 __pycache__/
+chroma_db_embed/
+hugging_face_models/
 
 
 # TypeScript v1 declaration files

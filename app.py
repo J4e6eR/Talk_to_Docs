@@ -90,7 +90,7 @@ def generate_output(query:str, database, llm, conversation_id: str = None):
     print("Prompt = ", prompt)
     question ="'temperature 0.01' \n" + prompt[0].page_content + '\n Give me a summary in context to the question and print only the summary\n' + query #We wil have to think of a better option to pick out relevant documents instead of the very first one
     # llm = model_init(config)
-    llm._call(prompt,role=Role_type.USER.value, conversation_id=conversation_id)
+    llm._call(prompt=question,role=Role_type.USER.value, conversation_id=conversation_id)
     
     # The output needs to be formatted as it would include a lot of information of no use to the User
     return llm.response['message'] 
