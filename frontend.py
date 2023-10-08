@@ -45,6 +45,24 @@ def main():
     # Uploading the file complete
     st.title("Talk to your Documents")
     uploaded_file = st.file_uploader("Upload a document", type=["pdf", "docx", "txt"])
+    
+    # For uploading the file name and file URL
+    # link_upload = list()
+    # link_upload = [st.text_input("Enter the link of the pdf", value="", key="link_upload", help="Enter your input text here.")]
+    # if link_upload[0] is not None:
+    #     link_upload =link_upload + [st.text_input("Enter the file name", value="", key="file_name", help="Enter your input text here.")] 
+    link_upload = ""
+    pdf_upload = ""
+    placeholder_1 = st.empty()
+
+    # Check if input_1 is empty
+    if not link_upload:
+        link_upload = placeholder_1.text_input("Enter the link of the pdf", value="", key="link_upload", help="Enter your input text here.")
+
+    # Check if input_1 is not empty, then create a placeholder for the second text input
+    if link_upload and not pdf_upload:
+        placeholder_2 = st.empty()
+        pdf_upload = placeholder_2.text_input("Enter the file name", value="", key="file_name", help="Enter your input text here.")
     # file_path = file + '\\docs\\' + 'dummyfile.pdf'
     
     # Create a TextInput field
@@ -65,24 +83,29 @@ def main():
 
     # Button to init processing
     if st.button("Process New File") and input_value is not None:
-        if uploaded_file is not None:
-            st.write("You uploaded:", uploaded_file.name)
-            folder_path = file / 'docs' 
-            file_path =  folder_path / str(uploaded_file.name) 
+        if uploaded_file is not None or link_upload is not None:
+            if uploaded_file is not None:
+                st.write("You uploaded:", uploaded_file.name)
+                # doc_folder = file / 'docs' 
+                file_path =  doc_folder / str(uploaded_file.name) 
 
-            if os.path.exists(folder_path) or os.path.exists(file_path):
-                print("The file path already exists")
-            else:
-                print('The file path does not exist and will be created using os.makedirs()')
-                os.makedirs(folder_path)
+                if os.path.exists(doc_folder) or os.path.exists(file_path):
+                    print("The file path already exists")
+                else:
+                    print('The file path does not exist and will be created using os.makedirs()')
+                    os.makedirs(doc_folder)
 
-            print("File path = ", file_path)
+                print("File path = ", file_path)
 
-            with open(file_path, "wb") as temp_file:
-                temp_file.write(uploaded_file.read())
-            print("You uploaded the file", uploaded_file, 'file path = ', file_path)
-                    # Initializing the LLM model
-        
+                with open(file_path, "wb") as temp_file:
+                    temp_file.write(uploaded_file.read())
+                print("You uploaded the file", uploaded_file, 'file path = ', file_path)
+
+            # Added support for uploading links
+            elif link_upload is not None:
+                file_path = doc_folder / pdf_upload
+                app.download_file(url=link_upload, fp = str(file_path))
+            
             # Passing the doc to slit it into chunks 
             docs = app.docsReader_PDF(str(file_path))
             print("The docs successfully splitted into chunks ")

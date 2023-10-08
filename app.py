@@ -8,6 +8,8 @@ from customLLM import CustomLLM, Role_type
 from frontend import file_path, uploaded_file
 import tokens
 import app
+import tempfile
+import tqdm
 
 # loader = PyPDFLoader("https://arxiv.org/pdf/2303.18223.pdf")
 # documents = loader.load_and_split()
@@ -95,6 +97,20 @@ def generate_output(query:str, database, llm, conversation_id: str = None):
     # The output needs to be formatted as it would include a lot of information of no use to the User
     return llm.response.msg 
 
+# Can enable downloading for teh pdfs from any website
+def download_file(url, fp, skip_if_exists=True):
+  import requests, os, pathlib
+  if skip_if_exists and os.path.isfile(fp) and os.stat(fp).st_size > 0:
+    return
+  r = requests.get(url, stream=True)
+  assert r.status_code == 200
+  progress_bar = tqdm(total=int(r.headers.get('content-length', 0)), unit='B', unit_scale=True, desc=url)
+  print("Parent =", pathlib.Path(fp).parent)
+  with tempfile.NamedTemporaryFile(dir=pathlib.Path(fp).parent, delete=False) as f:
+    for chunk in r.iter_content(chunk_size=16384):
+      progress_bar.update(f.write(chunk))
+    f.close()
+    os.rename(f.name, fp)
 
 # if __name__ == '__main__' and uploaded_file:
     
