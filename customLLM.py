@@ -12,7 +12,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from langchain.llms.base import LLM
 from langchain.callbacks.manager import CallbackManager,CallbackManagerForLLMRun
 from langchain.callbacks.base import BaseCallbackHandler
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.schema import Document, LLMResult
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
 from OpenAI_chatGPT.openai import Role_type, OpenaiChat, Formatted_Response

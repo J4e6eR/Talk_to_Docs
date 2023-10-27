@@ -2,10 +2,10 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores  import Chroma
+from langchain.vectorstores.chroma  import Chroma
 # from customLLM import CustomLLM, MyHandler
 from customLLM import CustomLLM, Role_type
-from frontend import file_path, uploaded_file
+from frontend import uploaded_file
 import tokens
 import app
 import tempfile

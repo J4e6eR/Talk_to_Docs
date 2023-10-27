@@ -1,151 +1,105 @@
-# The frontend of the application written in streamlit
-# import streamlit as st
-# TODO: To solve the problem related to persist directory and locally stoing hugging face model
-# TRY THE NEW IMPLEMENTATION IN COLAB TOMORROW
+# # The frontend of the application written in streamlit
+# # TODO: Refactor the code for better experience
 
 import streamlit as st
 import app
 import tokens
-from ngrok_ import async_tasks
 from pathlib import Path
 import os
 
-# # To determine the location more accurately
-# HUGGING_FACE_MODEL = './hugging_face_model/'
-# CHROMADB_DIRECTORY = './chroma_db/'
-# import platform
-# if platform.system() is not 'Windows':
-#     HUGGING_FACE_MODEL = '.\\hugging_face_model\\'
-#     CHROMADB_DIRECTORY = '.\\chroma_db\\'
-
-
-file_path = None
 uploaded_file = None
 file = Path.cwd()
 hugging_face_dir = file / 'hugging_face_models'
 chroma_db_dir = file / 'chroma_db_embed'
-# async_tasks()
-
-# This function shoudl be called for generating summary for teh given prompt
-def gen_summary(input_value: str, db, llm, conversation_id: str = None):
-    if  input_value is not None:
-        summary = app.generate_output(input_value,db, llm, conversation_id=conversation_id)
-        print("The summary generated", summary)
-
-        # Display the input value
-        st.write("AI model:", summary)
-        print("You entered ", summary)    
-    
 
 def main():
-    print('Entered the main function')
-    global file_path
-    global uploaded_file
+    st.title("Talk to Docs")
+    st.sidebar.header("Options")
+    
+    process_new_file = st.sidebar.button("Process New File")
+    process_with_url = st.sidebar.button("Process New File with URL")
+    process_existing_file = st.sidebar.button("Process Existing File")
 
-    # Uploading the file complete
-    st.title("Talk to your Documents")
+    if process_new_file:
+        upload_file()
+
+    if process_with_url:
+        upload_file_with_url()
+
+    if process_existing_file:
+        process_existing_files()
+
+def upload_file():
+    global uploaded_file
+    st.header("Upload a Document")
     uploaded_file = st.file_uploader("Upload a document", type=["pdf", "docx", "txt"])
     
-    # For uploading the file name and file URL
-    # link_upload = list()
-    # link_upload = [st.text_input("Enter the link of the pdf", value="", key="link_upload", help="Enter your input text here.")]
-    # if link_upload[0] is not None:
-    #     link_upload =link_upload + [st.text_input("Enter the file name", value="", key="file_name", help="Enter your input text here.")] 
-    link_upload = ""
-    pdf_upload = ""
-    placeholder_1 = st.empty()
-
-    # Check if input_1 is empty
-    if not link_upload:
-        link_upload = placeholder_1.text_input("Enter the link of the pdf", value="", key="link_upload", help="Enter your input text here.")
-
-    # Check if input_1 is not empty, then create a placeholder for the second text input
-    if link_upload and not pdf_upload:
-        placeholder_2 = st.empty()
-        pdf_upload = placeholder_2.text_input("Enter the file name", value="", key="file_name", help="Enter your input text here.")
-    # file_path = file + '\\docs\\' + 'dummyfile.pdf'
-    
-    # Create a TextInput field
-    input_value = st.text_input("Enter your query:", value="", key="text_input_field", help="Enter your input text here.")
-    llm = app.model_init(access_token=tokens.load_verified_token('GPT_ACCESS_TOKEN'))
-    embedding_function = app.embedding_model_init(model_name = "BAAI/bge-large-en",
-                                                  model_kwargs = {'device': 'cpu'},
-                                                  encode_kwargs = {'normalize_embeddings': True,},
-                                                  cache_folder=str(hugging_face_dir))
-            
-    
-    print("Embedding function initialized", embedding_function)
-    doc_folder = file / 'docs'
-    if os.path.exists(doc_folder):
-        st.write("List of all files: ", os.listdir(str(doc_folder)))
-        print("List of all files: ", type(os.listdir(str(doc_folder))))
-
-
-    # Button to init processing
-    if st.button("Process New File") and input_value is not None:
-        if uploaded_file is not None or link_upload is not None:
-            if uploaded_file is not None:
-                st.write("You uploaded:", uploaded_file.name)
-                # doc_folder = file / 'docs' 
-                file_path =  doc_folder / str(uploaded_file.name) 
-
-                if os.path.exists(doc_folder) or os.path.exists(file_path):
-                    print("The file path already exists")
-                else:
-                    print('The file path does not exist and will be created using os.makedirs()')
-                    os.makedirs(doc_folder)
-
-                print("File path = ", file_path)
-
-                with open(file_path, "wb") as temp_file:
-                    temp_file.write(uploaded_file.read())
-                print("You uploaded the file", uploaded_file, 'file path = ', file_path)
-
-            # Added support for uploading links
-            elif link_upload is not None:
-                file_path = doc_folder / pdf_upload
-                app.download_file(url=link_upload, fp = str(file_path))
-            
-            # Passing the doc to slit it into chunks 
-            docs = app.docsReader_PDF(str(file_path))
-            print("The docs successfully splitted into chunks ")
-            # INitializing the embedding function
-            
-
-            # Converting the documents to vector store
-            db = app.vector_store(docs, embedding_function, save_locally=True, persist_directory=str(chroma_db_dir))
-            print("Convertomg the doc into vector store", db)
-            gen_summary(input_value, db, llm, conversation_id='c6f6fb09-6981-48c9-b4a8-2c77822fc691')
-
-
-            # config={
-            #     "access_token": f"{tokens.load_verified_token('GPT_ACCESS_TOKEN')}",
-            #     "conversation_id": '34e32a56-66f7-4955-bd40-526f78937ee8',
-            # }
-            # llm = app.model_init(config)
-            # To add conversation ID of the account which will be used
+    if uploaded_file:
+        pdf_name = uploaded_file.name
+        st.write(f"Uploaded file: {pdf_name}")
+        embedding_func, db = embedding_function_init(pdf_name, uploaded_file)
         
-    elif st.button("Process already existing file") and input_value is not None:
-        db = app.vector_load(persist_directory=str(chroma_db_dir), embedding_function=embedding_function)
-        gen_summary(input_value, db, llm, conversation_id='c6f6fb09-6981-48c9-b4a8-2c77822fc691')
+        if embedding_func and db:
+            prompt = st.text_input("Enter your query:")
+            if prompt:
+                llm = init_summarization_model()
+                gen_summary(prompt, db, llm, 'c6f6fb09-6981-48c9-b4a8-2c77822fc691')
 
-    elif input_value is not None:
-        llm._call(prompt=input_value, role='user', conversation_id='c6f6fb09-6981-48c9-b4a8-2c77822fc691', )
-        st.write("AI model:",llm.response.msg)
-        
+
+def process_file(embedding_function):
+    return app.vector_load(persist_directory=str(chroma_db_dir), embedding_function=embedding_function)
+
+def upload_file_with_url():
+    st.header("Upload a Document via URL")
+    input_value = st.text_input("Enter the URL of the pdf file")
+    pdf_name = st.text_input("Enter the name of the pdf file:")
+    
+    if input_value and pdf_name:
+        embedding_func, db = embedding_function_init(pdf_name, None, url=input_value)
+
+        if embedding_func and db:
+            prompt = st.text_input("Enter your query:")
+            if prompt:
+                llm = init_summarization_model()
+                gen_summary(prompt, db, llm, 'c6f6fb09-6981-48c9-b4a8-2c77822fc691')
+
+def process_existing_files():
+    st.header("Process Existing Files")
+    if os.path.exists('docs'):
+        st.write("List of all files: ", os.listdir('docs'))
+    process_file()
+
+def embedding_function_init(pdf_name:str = 'pdf_.pdf', uploaded_file=None, url=None, load_vector = False):
+    embedding_func = app.embedding_model_init(
+        model_name="BAAI/bge-large-en",
+        model_kwargs={'device': 'cpu'},
+        encode_kwargs={'normalize_embeddings': True},
+        cache_folder=str(hugging_face_dir)
+    )
+
+    
+    if url:
+        app.download_file(url=url, fp=f'docs/{pdf_name}')
+    elif uploaded_file:
+        pdf_path = f'docs/{pdf_name}'
+        with open(pdf_path, 'wb') as file:
+            file.write(uploaded_file.read())
+
+    docs = app.docsReader_PDF(f'docs/{pdf_name}')
+    if load_vector:
+        db = app.vector_load(str(chroma_db_dir), embedding_func)
     else:
-        print("You might have not entered the query to search for. Please enter it and try again")
+        db = app.vector_store(docs, embedding_func, save_locally=True, persist_directory = str(chroma_db_dir))
+    return embedding_func, db
 
+def gen_summary(input_value, db, llm, conversation_id=None):
+    if input_value:
+        summary = app.generate_output(input_value, db, llm, conversation_id=conversation_id)
+        st.subheader("Generated Text:")
+        st.write("AI model:", summary)
 
-        
-    
-
+def init_summarization_model():
+    return app.model_init(access_token=tokens.load_verified_token('GPT_ACCESS_TOKEN'))
 
 if __name__ == "__main__":
-    # Create a thread to run the Streamlit app
-    # thread = threading.Thread(target=main)
-    
-    # Start the thread
-    # thread.start()
-    # async_tasks()
     main()
