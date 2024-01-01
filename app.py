@@ -1,15 +1,22 @@
+# TODO: How can we get database from the uploaded file
+
 from langchain.document_loaders import PyPDFLoader
+from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores.chroma  import Chroma
-# from customLLM import CustomLLM, MyHandler
-from customLLM import CustomLLM, Role_type
-from frontend import uploaded_file
-import tokens
-import app
-import tempfile
-import tqdm
+# from customLLM import CustomLLM, Role_type
+# from frontend import uploaded_file
+import tokens, app, tempfile, tqdm, contextlib, time
+import os
+from pathlib import Path
+
+file = Path.cwd()
+hugging_face_dir = file / 'hugging_face_models'
+chroma_db_dir = file / 'chroma_db_embed'
+pdf_file_upload_location = file / 'docs'
+os.environ['TRANSFORMERS_CACHE'] = str(hugging_face_dir)
 
 # loader = PyPDFLoader("https://arxiv.org/pdf/2303.18223.pdf")
 # documents = loader.load_and_split()
@@ -19,7 +26,14 @@ import tqdm
 
 # print("Pages = ", len(pages))
 
+import contextlib, time
 
+class Timing(contextlib.ContextDecorator):
+  def __init__(self, prefix="", on_exit=None, enabled=True): self.prefix, self.on_exit, self.enabled = prefix, on_exit, enabled
+  def __enter__(self): self.st = time.perf_counter_ns()
+  def __exit__(self, *exc):
+    self.et = time.perf_counter_ns() - self.st
+    if self.enabled: print(f"{self.prefix}{self.et*1e-6:.2f} ms"+(self.on_exit(self.et) if self.on_exit else ""))
 
 
 
@@ -49,13 +63,12 @@ def embedding_model_init(model_name:str,
                          encode_kwargs:dict,
                          cache_folder:str
                          ):
-    embedding_func = HuggingFaceBgeEmbeddings(
+    return HuggingFaceBgeEmbeddings(
     model_name=model_name,
     model_kwargs=model_kwargs,
     encode_kwargs=encode_kwargs,
     cache_folder= cache_folder
 )
-    return embedding_func
 
 # Convert the documents to vector store and save them locally on chroma db
 def vector_store(docs,
@@ -74,28 +87,26 @@ def vector_store(docs,
 # load already existing vector store.
 def vector_load(persist_directory :str,
                 embedding_function :HuggingFaceBgeEmbeddings, 
-                ):
-    data_base = Chroma(persist_directory=persist_directory, embedding_function=embedding_function)
-    return data_base
+                ): return Chroma(persist_directory=persist_directory, embedding_function=embedding_function)
 
 # Initialises the model
-def model_init(access_token: str):
-    # The model should be initialized at the start of the session
-    llm = CustomLLM(access_token= access_token)
-    return llm
+def model_init(model_path: str, device_:str = 'cuda'):
 
+    if device_ == 'cuda' :device_ = 0
+    else: device_ = -1
+    return HuggingFacePipeline.from_model_id(
+      model_id="facebook/bart-large-cnn",
+      task="summarization",
+      device = device_,
+      pipeline_kwargs={"max_new_tokens": 200},
+  )
 
 # Generates the very output but in unformatted manner.
 def generate_output(query:str, database, llm, conversation_id: str = None):
     print("Query =", query)
     prompt = database.similarity_search(query=query)
     print("Prompt = ", prompt)
-    question ="'temperature 0.01' \n" + prompt[0].page_content + '\n Give me a summary in context to the question and print only the summary\n' + query #We wil have to think of a better option to pick out relevant documents instead of the very first one
-    # llm = model_init(config)
-    llm._call(prompt=question,role=Role_type.USER.value, conversation_id=conversation_id)
-    
-    # The output needs to be formatted as it would include a lot of information of no use to the User
-    return llm.response.msg 
+    return llm(prompt[0].page_content + '\n Give me a summary in context to the question and print only the summary\n' + query) #We wil have to think of a better option to pick out relevant documents instead of the very first one
 
 # Can enable downloading for teh pdfs from any website
 def download_file(url, fp, skip_if_exists=True):
