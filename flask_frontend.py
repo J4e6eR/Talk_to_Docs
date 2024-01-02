@@ -44,7 +44,9 @@ def machine_resp(prompt:str):
      with Timing("Inference completed"):
         if database:
             inference_ = generate_output(prompt, database=database, llm=model)
-            if inference_ : return f'<p>Machine: {inference_}</p>'  
+            print("INference =", inference_['choices'][0]['text'])
+            # if inference_ : return f'<p>Machine: {inference_}</p>'  
+            if inference_ : return f'<p>Machine: {inference_["choices"][0]["text"]}</p>'  
 
 
 if __name__ == '__main__':
@@ -58,5 +60,5 @@ if __name__ == '__main__':
         cache_folder=str(hugging_face_dir)
     )
     with Timing("Loading the model: "):
-        model = model_init(str(hugging_face_dir))
+        model = model_init(str(hugging_face_dir), using_hugging_face=False)
     app.run()

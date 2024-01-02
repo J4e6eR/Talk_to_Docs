@@ -6,6 +6,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores.chroma  import Chroma
+from llama_cpp import Llama
 # from customLLM import CustomLLM, Role_type
 # from frontend import uploaded_file
 import tokens, app, tempfile, tqdm, contextlib, time
@@ -90,23 +91,25 @@ def vector_load(persist_directory :str,
                 ): return Chroma(persist_directory=persist_directory, embedding_function=embedding_function)
 
 # Initialises the model
-def model_init(model_path: str, device_:str = 'cuda'):
+def model_init(model_path: str, device_:str = 'cuda', using_hugging_face:bool = True):
 
     if device_ == 'cuda' :device_ = 0
     else: device_ = -1
-    return HuggingFacePipeline.from_model_id(
-      model_id="facebook/bart-large-cnn",
-      task="summarization",
-      device = device_,
-      pipeline_kwargs={"max_new_tokens": 200},
-  )
+    if using_hugging_face:
+      return HuggingFacePipeline.from_model_id(
+        model_id="facebook/bart-large-cnn",
+        task="summarization",
+        device = device_,
+        pipeline_kwargs={"max_new_tokens": 200},
+    )
+    else: return Llama(model_path="/workspace/tmp/Talk_to_Docs/hugging_face_models/phi_2/phi-2.Q5_K_M.gguf", n_gpu_layers=30, n_ctx=2048)
 
 # Generates the very output but in unformatted manner.
 def generate_output(query:str, database, llm, conversation_id: str = None):
     print("Query =", query)
     prompt = database.similarity_search(query=query)
     print("Prompt = ", prompt)
-    return llm(prompt[0].page_content + '\n Give me a summary in context to the question and print only the summary\n' + query) #We wil have to think of a better option to pick out relevant documents instead of the very first one
+    return llm(prompt[0].page_content + '\n Give me a summary in context to the question and print only the summary\n' + query, max_tokens = 1000) #We wil have to think of a better option to pick out relevant documents instead of the very first one
 
 # Can enable downloading for teh pdfs from any website
 def download_file(url, fp, skip_if_exists=True):
