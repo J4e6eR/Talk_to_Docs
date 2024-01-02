@@ -102,7 +102,18 @@ def model_init(model_path: str, device_:str = 'cuda', using_hugging_face:bool = 
         device = device_,
         pipeline_kwargs={"max_new_tokens": 200},
     )
-    else: return Llama(model_path="/workspace/tmp/Talk_to_Docs/hugging_face_models/phi_2/phi-2.Q5_K_M.gguf", n_gpu_layers=30, n_ctx=2048)
+    else:
+       check_model_download() 
+       return Llama(model_path="/workspace/tmp/Talk_to_Docs/hugging_face_models/phi_2/phi-2.Q5_K_M.gguf", n_gpu_layers=30, n_ctx=2048)
+
+# Checks whether the model is downloaded or not and downlaods if not
+def check_model_download(model_path: str = str(file / 'hugging_face_models/phi_2')):
+   if os.path.exists(model_path): pass
+   else : 
+      print('Downlaoding the file')
+      os.mkdir(model_path)
+      download_file("https://huggingface.co/TheBloke/phi-2-GGUF/resolve/main/phi-2.Q5_K_M.gguf", model_path + '/phi-2.Q5_K_M.gguf')
+  #  download_file()
 
 # Generates the very output but in unformatted manner.
 def generate_output(query:str, database, llm, conversation_id: str = None):
@@ -118,11 +129,11 @@ def download_file(url, fp, skip_if_exists=True):
     return
   r = requests.get(url, stream=True)
   assert r.status_code == 200
-  progress_bar = tqdm(total=int(r.headers.get('content-length', 0)), unit='B', unit_scale=True, desc=url)
+  # progress_bar = tqdm(total=int(r.headers.get('content-length', 0)), unit='B', unit_scale=True, desc=url)
   print("Parent =", pathlib.Path(fp).parent)
   with tempfile.NamedTemporaryFile(dir=pathlib.Path(fp).parent, delete=False) as f:
     for chunk in r.iter_content(chunk_size=16384):
-      progress_bar.update(f.write(chunk))
+      f.write(chunk)
     f.close()
     os.rename(f.name, fp)
 
