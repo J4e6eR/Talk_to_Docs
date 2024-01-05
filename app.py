@@ -104,7 +104,7 @@ def model_init(model_path: str, device_:str = 'cuda', using_hugging_face:bool = 
     )
     else:
        check_model_download() 
-       return Llama(model_path="/workspace/tmp/Talk_to_Docs/hugging_face_models/phi_2/phi-2.Q5_K_M.gguf", n_gpu_layers=30, n_ctx=2048)
+       return Llama(model_path=str (hugging_face_dir  / "phi_2" / "phi-2.Q5_K_M.gguf"), n_gpu_layers=30, n_ctx=2048)
 
 # Checks whether the model is downloaded or not and downlaods if not
 def check_model_download(model_path: str = str(file / 'hugging_face_models/phi_2')):
